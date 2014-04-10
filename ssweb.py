@@ -78,15 +78,17 @@ if __name__ == '__main__':
   url, server = SingleShotWebserver()
   url += 'foo'
   import sys
-  response_body = None
+  response_queue = None
   if len(sys.argv) <= 1:
     print 'URL: %s' % url
     import thread
     import urllib
-    response_body = []
+    import Queue
+    response_queue = Queue.Queue()
     thread.start_new_thread(
-        lambda: response_body.append(urllib.urlopen(url).read()), ())
+        lambda: response_queue.put(urllib.urlopen(url).read()), ())
   else:
     print 'Please visit URL: %s' % url
   print server()  # Waits for incoming connection, serves it, returns info.
-  print response_body
+  if response_queue is not None:
+    print repr(response_queue.get())  # HTTP response body.
